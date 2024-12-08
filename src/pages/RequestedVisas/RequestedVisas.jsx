@@ -7,9 +7,11 @@ import useAuth from "../../hooks/useAuth";
 const RequestedVisas = () => {
   const [requestedVisas, setRequestedVisas] = useState([]);
   const { user } = useAuth();
+  const [flag, setFlag] = useState(true);
 
   useEffect(() => {
     const getAllRequestedVisasData = async () => {
+      setFlag(true);
       const { data } = await axios.get(
         `${import.meta.env.VITE_API_URL}/requested-visas?authorEmail=${
           user?.email
@@ -17,12 +19,13 @@ const RequestedVisas = () => {
       );
 
       setRequestedVisas(data);
+      setFlag(false);
     };
 
-    setTimeout(() => {
-      document.getElementById("loadingSpinner").style.display = "none";
-      document.getElementById("handleLoading").style.display = "block";
-    }, 2000);
+    // setTimeout(() => {
+    // document.getElementById("loadingSpinner").style.display = "none";
+    // document.getElementById("handleLoading").style.display = "block";
+    // }, 2000);
 
     window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -38,16 +41,8 @@ const RequestedVisas = () => {
         <title>World Pass Express | Requested Visas</title>
       </Helmet>
 
-      {/* Loading Spinner */}
-      <div
-        id="loadingSpinner"
-        className="h-screen flex flex-col justify-center items-center"
-      >
-        <span className="-mt-28 flex flex-row justify-center items-center h-56 mx-auto loading loading-spinner loading-lg text-success"></span>
-      </div>
-
       {/*  */}
-      <div id="handleLoading" className="hidden">
+      <div id="handleLoading" className="">
         {/* Handle Loading */}
         <div>
           {/* Heading */}
@@ -77,53 +72,65 @@ const RequestedVisas = () => {
             requestedVisas?.map((visa) => )
           } */}
 
+          {/* Loading Spinner */}
+          {flag && (
+            <div
+              id="loadingSpinner"
+              className="h-28 py-52 flex flex-col justify-center items-center"
+            >
+              <span className="-mt-28 flex flex-row justify-center items-center h-56 mx-auto loading loading-spinner loading-lg text-success"></span>
+            </div>
+          )}
+
           {/* Table */}
-          <div className="container p-2 mx-auto sm:p-4 ">
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-xs">
-                <colgroup>
-                  <col />
-                  <col />
-                  <col />
-                  <col />
-                  <col />
-                  <col className="w-24" />
-                </colgroup>
-                <thead className="">
-                  <tr className="text-left bg-gray-200">
-                    <th className="p-3">VISA ID #</th>
-                    <th className="p-3">Applied Date</th>
-                    <th className="p-3">Visa Type</th>
-                    <th className="p-3">Country Name</th>
-                    <th className="p-3">Applicant Name</th>
-                    <th className="p-3">Applicant Email</th>
-                    <th className="p-3 text-right">VISA Fee</th>
-                    <th className="p-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {requestedVisas?.map((visa) => (
-                    <tr key={visa?._id}>
-                      <td className="p-3">#{visa?.visaId}</td>
-                      <td className="p-3">{visa?.appliedDate}</td>
-                      <td className="p-3">{visa?.selectedVisaType}</td>
-                      <td className="p-3">{visa?.countryName}</td>
-                      <td className="p-3">{visa?.applicantName}</td>
-                      <td className="p-3">{visa?.applicantEmail}</td>
-                      <td className="p-3 text-right">${visa.fee}</td>
-                      <td className="p-3 text-center">
-                        {/* {visa.status === "pending" ? (
+          {!flag && (
+            <div className="container p-2 mx-auto sm:p-4 ">
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-xs">
+                  <colgroup>
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                    <col className="w-24" />
+                  </colgroup>
+                  <thead className="">
+                    <tr className="text-left bg-gray-200">
+                      <th className="p-3">VISA ID #</th>
+                      <th className="p-3">Applied Date</th>
+                      <th className="p-3">Visa Type</th>
+                      <th className="p-3">Country Name</th>
+                      <th className="p-3">Applicant Name</th>
+                      <th className="p-3">Applicant Email</th>
+                      <th className="p-3 text-right">VISA Fee</th>
+                      <th className="p-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {requestedVisas?.map((visa) => (
+                      <tr key={visa?._id}>
+                        <td className="p-3">#{visa?.visaId}</td>
+                        <td className="p-3">{visa?.appliedDate}</td>
+                        <td className="p-3">{visa?.selectedVisaType}</td>
+                        <td className="p-3">{visa?.countryName}</td>
+                        <td className="p-3">{visa?.applicantName}</td>
+                        <td className="p-3">{visa?.applicantEmail}</td>
+                        <td className="p-3 text-right">${visa.fee}</td>
+                        <td className="p-3 text-center">
+                          {/* {visa.status === "pending" ? (
                           <span className="text-yellow-500">Pending</span>
                         ) : (
                         )} */}
-                        <span className="">Paid</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                          <span className="">Paid</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
           {/* End Of Table */}
         </div>
       </div>
