@@ -14,6 +14,7 @@ const MyAddedVisa = () => {
   const [selectedVisaType, setSelectedVisaType] = useState("");
   const [selectedApplicationMethod, setSelectedApplicationMethod] =
     useState("");
+  const [flag, setFlag] = useState(true);
 
   // State to store selected documents
   const [selectedDocuments, setSelectedDocuments] = useState([]);
@@ -43,6 +44,7 @@ const MyAddedVisa = () => {
 
   useEffect(() => {
     const getMyAddedVisas = async () => {
+      setFlag(true);
       const { data } = await axios.get(
         `${import.meta.env.VITE_API_URL}/my-added-visas?authorEmail=${
           user?.email
@@ -50,19 +52,20 @@ const MyAddedVisa = () => {
       );
 
       setMyAddedVisas(data);
+      setFlag(false);
     };
 
     getMyAddedVisas();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [updateFlag]);
 
-  useEffect(() => {
-    setTimeout(() => {
-      document.getElementById("loadingSpinner").style.display = "none";
-      document.getElementById("handleLoading").style.display = "block";
-    }, 2000);
+  // useEffect(() => {
+  // setTimeout(() => {
+  // document.getElementById("loadingSpinner").style.display = "none";
+  // document.getElementById("handleLoading").style.display = "block";
+  // }, 2000);
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+  // }, []);
 
   useEffect(() => {
     // Update modal visa data
@@ -203,16 +206,8 @@ const MyAddedVisa = () => {
         <title>World Pass Express | My Added Visas</title>
       </Helmet>
 
-      {/* Loading Spinner */}
-      <div
-        id="loadingSpinner"
-        className="h-screen flex flex-col justify-center items-center"
-      >
-        <span className="-mt-28 flex flex-row justify-center items-center h-56 mx-auto loading loading-spinner loading-lg text-success"></span>
-      </div>
-
       {/* Handle Loading */}
-      <div id="handleLoading" className="hidden">
+      <div id="" className="">
         {/* Heading */}
         <div className="mt-10">
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold uppercase text-center">
@@ -232,25 +227,41 @@ const MyAddedVisa = () => {
           </h1>
         </div>
 
-        {myAddedVisas?.length === 0 && (
-          <div className="flex flex-col justify-center items-center mt-10">
-            <img className="w-40 h-40" src="/error.png" alt="" />
-            <h1 className="text-3xl font-bold uppercase text-red-500">
-              No Data founds
-            </h1>
+        {/* Loading Spinner */}
+        {flag && (
+          <div
+            id="loadingSpinner"
+            className="h-28 py-52 flex flex-col justify-center items-center"
+          >
+            <span className="-mt-28 flex flex-row justify-center items-center h-56 mx-auto loading loading-spinner loading-lg text-success"></span>
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-5 mt-14">
-          {myAddedVisas?.map((myVisa) => (
-            <MyAddedVisaCard
-              key={myVisa?._id}
-              visa={myVisa}
-              handleUpdate={handleUpdate}
-              handleDelete={handleDelete}
-            ></MyAddedVisaCard>
-          ))}
-        </div>
+        {!flag && (
+          <>
+            {myAddedVisas?.length === 0 && (
+              <div className="flex flex-col justify-center items-center mt-10">
+                <img className="w-40 h-40" src="/error.png" alt="" />
+                <h1 className="text-3xl font-bold uppercase text-red-500">
+                  No Data founds
+                </h1>
+              </div>
+            )}
+          </>
+        )}
+
+        {!flag && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-5 mt-14">
+            {myAddedVisas?.map((myVisa) => (
+              <MyAddedVisaCard
+                key={myVisa?._id}
+                visa={myVisa}
+                handleUpdate={handleUpdate}
+                handleDelete={handleDelete}
+              ></MyAddedVisaCard>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Update Modal */}
