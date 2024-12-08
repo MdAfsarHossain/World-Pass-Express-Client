@@ -1,19 +1,20 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useLoaderData, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Typewriter } from "react-simple-typewriter";
 import SingleVisaCard from "../../components/SingleVisaCard/SingleVisaCard";
 
 const AllVisas = () => {
   // TODO: Fetch visas from the backend API and display them here.
-  const allVisas = useLoaderData() || {};
-  const [displayVisasData, setDisplayVisasData] = useState(allVisas);
+  // const allVisas = useLoaderData() || {};
+  const [displayVisasData, setDisplayVisasData] = useState([]);
   const location = useLocation();
 
   // State to store the selected visa type
   const [selectedVisaType, setSelectedVisaType] = useState("");
   const [searchText, setSearchText] = useState("");
+  const [flag, setFlag] = useState(true);
 
   // List of visa types
   const visaTypes = [
@@ -27,18 +28,21 @@ const AllVisas = () => {
 
   useEffect(() => {
     const getVisasDataByUsingSearch = async () => {
+      setFlag(true);
       const { data } = await axios.get(
         `${
           import.meta.env.VITE_API_URL
         }/all-visas?filter=${selectedVisaType}&search=${searchText}`
       );
+      setFlag(false);
       setDisplayVisasData(data);
+      // document.getElementById("loadingSpinner").style.display = "none";
     };
 
-    setTimeout(() => {
-      document.getElementById("loadingSpinner").style.display = "none";
-      document.getElementById("handleLoading").style.display = "block";
-    }, 2000);
+    // setTimeout(() => {
+    // document.getElementById("loadingSpinner").style.display = "none";
+    // document.getElementById("handleLoading").style.display = "block";
+    // }, 2000);
 
     window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -48,6 +52,7 @@ const AllVisas = () => {
   // Handle Visa type change event
   const handleChange = async (event) => {
     setSelectedVisaType(event.target.value);
+    setFlag(true);
 
     const { data } = await axios.get(
       `${import.meta.env.VITE_API_URL}/all-visas?filter=${
@@ -56,6 +61,7 @@ const AllVisas = () => {
     );
 
     setDisplayVisasData(data);
+    setFlag(false);
   };
 
   // Handle search button click event
@@ -75,15 +81,16 @@ const AllVisas = () => {
         <title>World Pass Express | All Visas</title>
       </Helmet>
 
-      <div
+      {/* <div
         id="loadingSpinner"
         className="h-screen flex flex-col justify-center items-center"
       >
         <span className="-mt-28 flex flex-row justify-center items-center h-56 mx-auto loading loading-spinner loading-lg text-success"></span>
-      </div>
+      </div> */}
 
       {/* Handle Loading Spinner */}
-      <div id="handleLoading" className="hidden">
+      {/* hidden */}
+      <div id="handleLoading" className="">
         {/* Heading */}
         <div className="mt-10">
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold uppercase text-center">
@@ -160,13 +167,24 @@ const AllVisas = () => {
           </div>
         </div>
 
-        <div id="visasAllDataId">
-          <div className="px-10 md:px-10 lg:px-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-5">
-            {displayVisasData?.map((visa) => (
-              <SingleVisaCard key={visa?._id} visa={visa} />
-            ))}
+        {flag && (
+          <div
+            id="loadingSpinner"
+            className="h-28 py-52 flex flex-col justify-center items-center"
+          >
+            <span className="-mt-28 flex flex-row justify-center items-center h-56 mx-auto loading loading-spinner loading-lg text-success"></span>
           </div>
-        </div>
+        )}
+
+        {!flag && (
+          <div id="visasAllDataId">
+            <div className="px-10 md:px-10 lg:px-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-5">
+              {displayVisasData?.map((visa) => (
+                <SingleVisaCard key={visa?._id} visa={visa} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
