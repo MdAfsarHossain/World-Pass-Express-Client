@@ -30,7 +30,7 @@ const MyVisaApplications = () => {
       setFlag(false);
     };
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    // window.scrollTo({ top: 0, behavior: "smooth" });
 
     getAllVisaApplicationsData();
     window.scrollTo({ top: 0, behavior: "smooth" });
