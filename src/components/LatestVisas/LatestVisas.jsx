@@ -6,15 +6,18 @@ import SingleVisaCard from "../SingleVisaCard/SingleVisaCard";
 
 const LatestVisas = () => {
   const [latestVisasData, setLatestVisasData] = useState([]);
+  const [flag, setFlag] = useState(true);
 
   // Fetch latest visas data from an API or a database
   useEffect(() => {
     const getLatestVisasData = async () => {
+      setFlag(true);
       const { data } = await axios.get(
         `${import.meta.env.VITE_API_URL}/latest-visas`
       );
 
       setLatestVisasData(data);
+      setFlag(false);
     };
 
     getLatestVisasData();
@@ -41,12 +44,24 @@ const LatestVisas = () => {
         </h1>
       </div>
 
+      {/* Loading Spinner */}
+      {flag && (
+        <div
+          id="loadingSpinner"
+          className="h-28 py-52 flex flex-col justify-center items-center"
+        >
+          <span className="-mt-28 flex flex-row justify-center items-center h-56 mx-auto loading loading-spinner loading-lg text-success"></span>
+        </div>
+      )}
+
       {/* Latest Data */}
-      <div className="px-10 md:px-10 lg:px-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-5 mt-14">
-        {latestVisasData?.map((visa) => (
-          <SingleVisaCard key={visa?._id} visa={visa}></SingleVisaCard>
-        ))}
-      </div>
+      {!flag && (
+        <div className="px-10 md:px-10 lg:px-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-5 mt-14">
+          {latestVisasData?.map((visa) => (
+            <SingleVisaCard key={visa?._id} visa={visa}></SingleVisaCard>
+          ))}
+        </div>
+      )}
 
       <div className="flex flex-col justify-center items-center mt-10">
         <Link
