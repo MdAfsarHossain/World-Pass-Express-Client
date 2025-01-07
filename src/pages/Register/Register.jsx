@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import { TbFidgetSpinner } from "react-icons/tb";
 import { Link, useNavigate } from "react-router-dom";
+import { imageUpload } from "../../components/api/ults";
 import useAuth from "../../hooks/useAuth";
-import { Helmet } from "react-helmet-async";
 
 const Register = () => {
   const {
@@ -12,6 +14,8 @@ const Register = () => {
     updateUserProfile,
     setUser,
     user,
+    loading,
+    setLoading,
     userLoginEmail,
     setUserLoginEmail,
   } = useAuth();
@@ -29,12 +33,16 @@ const Register = () => {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     setError("");
     const userName = data.username;
     const email = data.email;
     const password = data.password;
-    const photoUrl = data.photoUrl;
+    const image = data.photoFile[0];
+    // const photoUrl = data.photoFile[0].name;
+
+    const formData = new FormData();
+    formData.append("image", image);
 
     if (password.length < 6) {
       setError("Password must be at least 6 characters long.");
@@ -51,26 +59,49 @@ const Register = () => {
       return;
     }
 
-    // console.log(userName, email, password, photoUrl);
-    createUser(email, password)
-      .then((result) => {
-        updateUserProfile(userName, photoUrl)
-          .then((result) => {
-            toast.success("User Registered successfully!!");
-            setUser({ ...user, displayName: userName, photoURL: photoUrl });
-            navigate("/");
-          })
-          .catch((error) => {
-            toast.error("Error Registering: " + error.message);
-          });
-      })
-      .catch((error) => {
-        toast.error("Error Registering: " + error.message);
-      });
+    // console.log(userName, email, password);
+    // console.log(image);
+
+    try {
+      setLoading(true);
+
+      // 1. Upload imag and get image url
+      const image_url = await imageUpload(image);
+
+      // 2. User Registration
+      const result = await createUser(email, password);
+
+      // 3. Save username and photo in firebase
+      await updateUserProfile(userName, image_url);
+      toast.success("User Registered successfully!!");
+      setUser({ ...user, displayName: userName, photoURL: photoUrl });
+      navigate("/");
+    } catch (error) {
+      toast.error("Error Registering: " + error.message);
+    }
+
+    // return;
+
+    // createUser(email, password)
+    //   .then((result) => {
+    //     updateUserProfile(userName, photoUrl)
+    //       .then((result) => {
+    //         toast.success("User Registered successfully!!");
+    //         setUser({ ...user, displayName: userName, photoURL: photoUrl });
+    //         navigate("/");
+    //       })
+    //       .catch((error) => {
+    //         toast.error("Error Registering: " + error.message);
+    //       });
+    //   })
+    //   .catch((error) => {
+    //     toast.error("Error Registering: " + error.message);
+    //   });
   };
 
   const handleGoogleRegister = () => {
     // console.log("Register:");
+    setLoading(true);
     registerWithGoogle()
       .then((result) => {
         toast.success("Registered Successfully!!");
@@ -130,18 +161,18 @@ const Register = () => {
           {/* Photo URL */}
           <div className="space-y-1 text-sm">
             <label htmlFor="username" className="block text-gray-700">
-              Photo Url
+              Select Image:
             </label>
             <input
-              type="text"
-              name="photoUrl"
+              type="file"
+              name="photoFile"
               id="photoUrl"
               placeholder="Photo URL"
               className="w-full px-4 py-3 rounded-md border-gray-700 bg-gray-100 focus:border-violet-400"
-              {...register("photoUrl", { required: true })}
+              {...register("photoFile", { required: true })}
             />
           </div>
-          {errors.photoUrl && (
+          {errors.photoFile && (
             <span className="text-red-500">This field is required</span>
           )}
 
@@ -171,8 +202,15 @@ const Register = () => {
             </a>
           </div> */}
           </div>
-          <button className="block w-full px-4 py-3 rounded-lg text-center bg-green-500 text-white font-bold text-xl border-2 border-green-500 hover:bg-transparent hover:text-green-500 transition-all">
-            Register
+          <button
+            disabled={loading}
+            className="block w-full px-4 py-3 rounded-lg text-center bg-green-500 text-white font-bold text-xl border-2 border-green-500 hover:bg-transparent hover:text-green-500 transition-all"
+          >
+            {loading ? (
+              <TbFidgetSpinner className="animate-spin m-auto" />
+            ) : (
+              "Register"
+            )}
           </button>
         </form>
 
