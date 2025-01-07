@@ -1,11 +1,18 @@
 import { Helmet } from "react-helmet-async";
 import toast from "react-hot-toast";
+import { TbFidgetSpinner } from "react-icons/tb";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 
 const Login = () => {
-  const { logInUser, registerWithGoogle, setUserLoginEmail, userLoginEmail } =
-    useAuth() || {};
+  const {
+    logInUser,
+    registerWithGoogle,
+    setUserLoginEmail,
+    userLoginEmail,
+    loading,
+    setLoading,
+  } = useAuth() || {};
   // setUserLoginEmail("");
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,6 +26,7 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setLoading(true);
     // console.log(data);
     // const email = data.email;
     // const password = data.password;
@@ -40,6 +48,7 @@ const Login = () => {
 
   const handleGoogleLogin = () => {
     // console.log("Google Login");
+    setLoading(true);
     registerWithGoogle()
       .then((result) => {
         toast.success("Logged in with Google successfully!");
@@ -117,8 +126,15 @@ const Login = () => {
               <button>Forgot Password?</button>
             </div>
           </div>
-          <button className="block w-full px-4 py-3 rounded-lg text-center bg-green-500 text-white font-bold text-xl border-2 border-green-500 hover:bg-transparent hover:text-green-500 transition-all">
-            Log In
+          <button
+            disabled={loading}
+            className="disabled:cursor-not-allowed block w-full px-4 py-3 rounded-lg text-center bg-green-500 text-white font-bold text-xl border-2 border-green-500 hover:bg-transparent hover:text-green-500 transition-all"
+          >
+            {loading ? (
+              <TbFidgetSpinner className="animate-spin m-auto" />
+            ) : (
+              "Log In"
+            )}
           </button>
         </form>
 
