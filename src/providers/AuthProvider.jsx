@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
@@ -38,8 +39,14 @@ const AuthProvider = ({ children }) => {
   };
 
   // Logout user
-  const logOut = () => {
+  const logOut = async () => {
     setLoading(true);
+
+    // Remove the token from the cookie
+    const { data } = await axios(`${import.meta.env.VITE_API_URL}/logout`, {
+      withCredentials: true,
+    });
+
     return signOut(auth);
   };
 
@@ -58,10 +65,25 @@ const AuthProvider = ({ children }) => {
     return sendPasswordResetEmail(auth, email);
   };
 
+  // Get token from server
+  const getToken = async (email) => {
+    const { data } = await axios.post(
+      `${import.meta.env.VITE_API_URL}/jwt`,
+      { email },
+      { withCredentials: true }
+    );
+    // console.log(data);
+    return data;
+  };
+
   // State User or Observ current user
   useEffect(() => {
     const unSubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        getToken(currentUser.email);
+      }
       setUser(currentUser);
+
       setLoading(false);
       // console.log("User State Changed: ", currentUser);
     });
@@ -74,6 +96,7 @@ const AuthProvider = ({ children }) => {
     user,
     setUser,
     loading,
+    setLoading,
     createUser,
     logInUser,
     logOut,
