@@ -1,11 +1,13 @@
-import axios from "axios";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import toast from "react-hot-toast";
 import { Typewriter } from "react-simple-typewriter";
 import Swal from "sweetalert2";
+import LoadingSpinner from "../../components/LoadingSpinner/LoadingSpinner";
 import MyVisaApplicationCard from "../../components/MyVisaApplicationCard/MyVisaApplicationCard";
 import useAuth from "../../hooks/useAuth";
+import { axiosSecure } from "../../hooks/useAxiosSecure";
 
 const MyVisaApplications = () => {
   const { user } = useAuth();
@@ -15,47 +17,50 @@ const MyVisaApplications = () => {
 
   useEffect(() => {
     const getAllVisaApplicationsData = async () => {
-      // const { data } = await axios.get(
-      //   `${import.meta.env.VITE_API_URL}/my-visa-applications?applicantEmail=${
-      //     user?.email
-      //   }&search=${searchText}`
-      // );
       setFlag(true);
-      const { data } = await axios.get(
-        `${import.meta.env.VITE_API_URL}/my-visa-applications?applicantEmail=${
-          user?.email
-        }`
+
+      const { data } = await axiosSecure(
+        `/my-visa-applications?applicantEmail=${user?.email}`
       );
       setMyVisaApplications(data);
       setFlag(false);
     };
 
-    // window.scrollTo({ top: 0, behavior: "smooth" });
-
-    getAllVisaApplicationsData();
+    // getAllVisaApplicationsData();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
   // searchText
 
-  // useEffect(() => {
-  // setTimeout(() => {
-  // document.getElementById("loadingSpinner").style.display = "none";
-  // document.getElementById("handleLoading").style.display = "block";
-  // }, 2000);
+  // Load all my visa Applications data by using tanstack query
+  const {
+    data: myAllVisaApplicationsData = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["myAllVisaApplicationsData"],
+    queryFn: async () => {
+      setFlag(true);
+      const { data } = await axiosSecure(
+        `/my-visa-applications?applicantEmail=${user?.email}&search=${searchText}`
+      );
+      setFlag(false);
+      return data;
+    },
+  });
 
-  // }, []);
+  // Delete data from the database using tanstack query
+  const { mutateAsync } = useMutation({
+    mutationFn: async (id) => {
+      const { data } = await axiosSecure.delete(`/visa-application/${id}`);
+      return data;
+    },
+    onSuccess: (data) => {
+      refetch();
+    },
+  });
 
   // Hanlde Delete Btn clicked
   const handleDelete = async (id) => {
-    // const { data } = await axios.delete(
-    //   `${import.meta.env.VITE_API_URL}/visa-application/${id}`
-    // );
-    // const updatedVisaApplications = myVisaApplications.filter(
-    //   (app) => app?._id !== id
-    // );
-    // setMyVisaApplications(updatedVisaApplications);
-    // toast.success("Visa Application deleted successfully.");
-
     try {
       const swalWithBootstrapButtons = Swal.mixin({
         customClass: {
@@ -76,19 +81,25 @@ const MyVisaApplications = () => {
         })
         .then(async (result) => {
           if (result.isConfirmed) {
+            try {
+              await mutateAsync(id);
+            } catch (error) {
+              toast.error(error.message);
+            }
+
             swalWithBootstrapButtons.fire({
               title: "Deleted!",
               text: "Your visa application has been deleted.",
               icon: "success",
             });
 
-            const { data } = await axios.delete(
-              `${import.meta.env.VITE_API_URL}/visa-application/${id}`
-            );
-            const updatedVisaApplications = myVisaApplications.filter(
-              (app) => app?._id !== id
-            );
-            setMyVisaApplications(updatedVisaApplications);
+            // const { data } = await axios.delete(
+            //   `${import.meta.env.VITE_API_URL}/visa-application/${id}`
+            // );
+            // const updatedVisaApplications = myVisaApplications.filter(
+            //   (app) => app?._id !== id
+            // );
+            // setMyVisaApplications(updatedVisaApplications);
             // toast.success("Visa Application deleted successfully.");
           } else if (
             /* Read more about handling dismissals below */
@@ -108,30 +119,13 @@ const MyVisaApplications = () => {
 
   // Hanlde search btn click
   const handleSearchBtn = async () => {
-    // console.log("Search btn click");
-
-    // document.getElementById("visasAllDataId").style.display = "none";
-    // document.getElementById("loadingSpinnerForSearchData").style.display =
-    // "flex";
-
-    // setTimeout(() => {
-    // document.getElementById("loadingSpinnerForSearchData").style.display =
-    // "none";
-    // document.getElementById("visasAllDataId").style.display = "grid";
-    // }, 2000);
-
-    setFlag(true);
-    const { data } = await axios.get(
-      `${import.meta.env.VITE_API_URL}/my-visa-applications?applicantEmail=${
-        user?.email
-      }&search=${searchText}`
-    );
-    setMyVisaApplications(data);
-    setFlag(false);
+    refetch();
   };
 
+  if (isLoading) return <LoadingSpinner />;
+
   return (
-    <div className="px-10">
+    <div className="px-2">
       {/* Dynamic Title */}
       <Helmet>
         <title>World Pass Express | My Visa Applications</title>
@@ -183,18 +177,18 @@ const MyVisaApplications = () => {
         </div>
 
         {/* Loading Spinner */}
-        {flag && (
+        {/* {flag && (
           <div
             id="loadingSpinner"
             className="h-28 py-52  flex flex-col justify-center items-center"
           >
             <span className="-mt-28 flex flex-row justify-center items-center h-56 mx-auto loading loading-spinner loading-lg text-success"></span>
           </div>
-        )}
+        )} */}
 
         {!flag && (
           <>
-            {myVisaApplications?.length === 0 && (
+            {myAllVisaApplicationsData?.length === 0 && (
               <div className="flex flex-col justify-center items-center mt-10">
                 <img className="w-40 h-40" src="/error.png" alt="" />
                 <h1 className="text-3xl font-bold uppercase text-red-500">
@@ -205,6 +199,7 @@ const MyVisaApplications = () => {
           </>
         )}
 
+
         {/* <div
           id="loadingSpinnerForSearchData"
           className="h-28 flex-col justify-center items-center hidden"
@@ -213,24 +208,68 @@ const MyVisaApplications = () => {
         </div> */}
 
         {/* hidden */}
-        {!flag && (
+        {/* {!flag && ( */}
+
+        {myAllVisaApplicationsData?.length > 0 &&
           <>
-            {myVisaApplications?.length !== 0 && (
-              <div id="visasAllDataId" className="">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-5 rounded-xl mt-10">
-                  {myVisaApplications?.map((myApplication, idx) => (
-                    <MyVisaApplicationCard
-                      key={idx}
-                      myApplication={myApplication}
-                      visaId={myApplication?.visaId}
-                      handleDelete={handleDelete}
-                    ></MyVisaApplicationCard>
-                  ))}
-                </div>
+            {/* Table Formate */}
+            <div className="container p-2 mx-auto sm:p-4 mt-8">
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-xs">
+                  <colgroup>
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                    <col className="w-24" />
+                  </colgroup>
+                  <thead className="">
+                    <tr className="text-left bg-gray-200">
+                      <th className="p-3">VISA ID #</th>
+                      <th className="p-3">Image</th>
+                      <th className="p-3">Applied Date</th>
+                      <th className="p-3 text-center">Visa Type</th>
+                      <th className="p-3">Country Name</th>
+                      <th className="p-3">VISA Fee</th>
+                      {/* <th className="p-3 text-center">Update</th> */}
+                      <th className="p-3 text-center">Delete</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {myAllVisaApplicationsData?.map((myApplication, idx) => (
+                      <MyVisaApplicationCard
+                        key={idx}
+                        myApplication={myApplication}
+                        visaId={myApplication?.visaId}
+                        handleDelete={handleDelete}
+                      ></MyVisaApplicationCard>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            )}
+            </div>
+
+            {/* Cards Formate */}
+            {/* <div>
+              {myAllVisaApplicationsData?.length !== 0 && (
+                <div id="visasAllDataId" className="">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-5 rounded-xl mt-10">
+                    {myAllVisaApplicationsData?.map((myApplication, idx) => (
+                      <MyVisaApplicationCard
+                        key={idx}
+                        myApplication={myApplication}
+                        visaId={myApplication?.visaId}
+                        handleDelete={handleDelete}
+                      ></MyVisaApplicationCard>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div> */}
           </>
-        )}
+          // {/* )} */}
+        }
       </div>
     </div>
   );
