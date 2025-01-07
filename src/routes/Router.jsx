@@ -9,6 +9,8 @@ import MyAddedVisa from "../pages/MyAddedVisa/MyAddedVisa";
 import MyVisaApplications from "../pages/MyVisaApplications/MyVisaApplications";
 import Register from "../pages/Register/Register";
 import RequestedVisas from "../pages/RequestedVisas/RequestedVisas";
+import Reviews from "../pages/Reviews/Reviews";
+import ServicesPage from "../pages/ServicesPage/ServicesPage";
 import VisaDetails from "../pages/VisaDetails/VisaDetails";
 import PrivateRoute from "./PrivateRoute";
 
@@ -26,6 +28,14 @@ const router = createBrowserRouter([
         path: "/all-visas",
         element: <AllVisas />,
         loader: () => fetch(`${import.meta.env.VITE_API_URL}/all-visas`),
+      },
+      {
+        path: '/services',
+        element: <ServicesPage />,
+      },
+      {
+        path: '/reviews',
+        element: <Reviews />,
       },
       {
         path: "/add-visa",
@@ -54,9 +64,9 @@ const router = createBrowserRouter([
       {
         path: "/visa-details/:id",
         element: (
-          <PrivateRoute>
-            <VisaDetails />
-          </PrivateRoute>
+          // <PrivateRoute>
+          <VisaDetails />
+          // </PrivateRoute>
         ),
         loader: ({ params }) =>
           fetch(`${import.meta.env.VITE_API_URL}/visa-details/${params.id}`),
