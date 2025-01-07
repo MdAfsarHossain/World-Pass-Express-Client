@@ -195,7 +195,7 @@ const VisaDetails = () => {
           {/* Apply Button Section */}
           <div className="mt-10 w-full md:w-1/2 md:mx-auto lg:w-full">
             <button
-              disabled={user?.email === visa?.authorEmail ? true : false}
+              disabled={user?.email === visa?.authorEmail ? true : false || !user}
               onClick={handleApplyVisa}
               className="disabled:cursor-not-allowed  btn-primary bg-green-500 text-white px-5 py-2 rounded-lg font-bold w-full border-2 border-green-500 hover:bg-transparent hover:text-green-500 hover:border-green-500 transition-all"
             >
