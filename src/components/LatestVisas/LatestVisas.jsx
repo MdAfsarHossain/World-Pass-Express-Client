@@ -1,30 +1,42 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Typewriter } from "react-simple-typewriter";
+import { axiosSecure } from "../../hooks/useAxiosSecure";
 import SingleVisaCard from "../SingleVisaCard/SingleVisaCard";
 
 const LatestVisas = () => {
-  const [latestVisasData, setLatestVisasData] = useState([]);
+  // const [latestVisasData, setLatestVisasData] = useState([]);
   const [flag, setFlag] = useState(true);
 
   // Fetch latest visas data from an API or a database
-  useEffect(() => {
-    const getLatestVisasData = async () => {
+  // useEffect(() => {
+  //   const getLatestVisasData = async () => {
+  //     setFlag(true);
+  //     const { data } = await axios.get(
+  //       `${import.meta.env.VITE_API_URL}/latest-visas`
+  //     );
+
+  //     setLatestVisasData(data);
+  //     setFlag(false);
+  //   };
+
+  //   getLatestVisasData();
+  // }, []);
+
+  // Load data by using tanstach query
+  const { data: latestVisasData = [], isLoading } = useQuery({
+    queryKey: ["latestVisasData"],
+    queryFn: async () => {
       setFlag(true);
-      const { data } = await axios.get(
-        `${import.meta.env.VITE_API_URL}/latest-visas`
-      );
-
-      setLatestVisasData(data);
+      const { data } = await axiosSecure(`/latest-visas`);
       setFlag(false);
-    };
-
-    getLatestVisasData();
-  }, []);
+      return data;
+    },
+  });
 
   return (
-    <div className="mb-40">
+    <div className="mb-20">
       {/* Heading */}
       <div className="mt-20">
         <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold uppercase text-center">
