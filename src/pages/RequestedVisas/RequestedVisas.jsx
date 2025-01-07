@@ -1,8 +1,10 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Typewriter } from "react-simple-typewriter";
+import LoadingSpinner from "../../components/LoadingSpinner/LoadingSpinner";
 import useAuth from "../../hooks/useAuth";
+import { axiosSecure } from "../../hooks/useAxiosSecure";
 
 const RequestedVisas = () => {
   const [requestedVisas, setRequestedVisas] = useState([]);
@@ -12,10 +14,14 @@ const RequestedVisas = () => {
   useEffect(() => {
     const getAllRequestedVisasData = async () => {
       setFlag(true);
-      const { data } = await axios.get(
-        `${import.meta.env.VITE_API_URL}/requested-visas?authorEmail=${
-          user?.email
-        }`
+      // const { data } = await axios.get(
+      //   `${import.meta.env.VITE_API_URL}/requested-visas?authorEmail=${
+      //     user?.email
+      //   }`,
+      //   { withCredentials: true }
+      // );
+      const { data } = await axiosSecure(
+        `/requested-visas?authorEmail=${user?.email}`
       );
 
       setRequestedVisas(data);
@@ -29,8 +35,23 @@ const RequestedVisas = () => {
 
     window.scrollTo({ top: 0, behavior: "smooth" });
 
-    getAllRequestedVisasData();
+    // getAllRequestedVisasData();
   }, []);
+
+  // Load all requested visas data by using tanstack query
+  const { data: requestedData = [], isLoading, refetch } = useQuery({
+    queryKey: ["requestedData"],
+    queryFn: async () => {
+      setFlag(true);
+      const { data } = await axiosSecure(
+        `/requested-visas?authorEmail=${user?.email}`
+      );
+      setFlag(false);
+      return data;
+    },
+  });
+
+  if (isLoading) return <LoadingSpinner />;
 
   //   console.log(requestedVisas);
 
@@ -66,24 +87,38 @@ const RequestedVisas = () => {
         </div>
 
         <div className="mt-10">
-          {/* <h1>Data: {requestedVisas.length}</h1> */}
+          {/* <h1>Data: {requestedVisas?.length}</h1> */}
           {/* 
           {
             requestedVisas?.map((visa) => )
           } */}
 
           {/* Loading Spinner */}
-          {flag && (
+          {/* {flag && (
             <div
               id="loadingSpinner"
               className="h-28 py-52 flex flex-col justify-center items-center"
             >
               <span className="-mt-28 flex flex-row justify-center items-center h-56 mx-auto loading loading-spinner loading-lg text-success"></span>
             </div>
+          )} */}
+
+          {!flag && (
+            <>
+              {requestedData?.length === 0 && (
+                <div className="flex flex-col justify-center items-center mt-10">
+                  <img className="w-40 h-40" src="/error.png" alt="" />
+                  <h1 className="text-3xl font-bold uppercase text-red-500">
+                    No Data founds
+                  </h1>
+                </div>
+              )}
+            </>
           )}
 
           {/* Table */}
-          {!flag && (
+          {/* {!flag && ( */}
+          {requestedData?.length > 0 &&
             <div className="container p-2 mx-auto sm:p-4 ">
               <div className="overflow-x-auto">
                 <table className="min-w-full text-xs">
@@ -108,7 +143,7 @@ const RequestedVisas = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {requestedVisas?.map((visa) => (
+                    {requestedData?.map((visa) => (
                       <tr key={visa?._id}>
                         <td className="p-3">#{visa?.visaId}</td>
                         <td className="p-3">{visa?.appliedDate}</td>
@@ -130,7 +165,8 @@ const RequestedVisas = () => {
                 </table>
               </div>
             </div>
-          )}
+          }
+          {/* )} */}
           {/* End Of Table */}
         </div>
       </div>
