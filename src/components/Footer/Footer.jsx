@@ -29,41 +29,41 @@ const Footer = () => {
               <Tooltip id="home-tooltip" />
 
               <Link
-                to="/"
+                to="/all-visas"
                 className="mx-4 text-sm  transition-colors duration-300 hover:text-green-500  dark:hover:text-green-400"
                 aria-label="Reddit"
                 data-tooltip-id="about-tooltip"
-                data-tooltip-content="About"
+                data-tooltip-content="All Visas"
                 data-tooltip-place="bottom-end"
               >
                 {" "}
-                About{" "}
+                All Visas{" "}
               </Link>
               <Tooltip id="about-tooltip" />
 
               <Link
-                to="/"
+                to="/services"
                 className="mx-4 text-sm  transition-colors duration-300 hover:text-green-500  dark:hover:text-green-400"
                 aria-label="Reddit"
                 data-tooltip-id="teams-tooltip"
-                data-tooltip-content="Teams"
+                data-tooltip-content="Services"
                 data-tooltip-place="bottom-end"
               >
                 {" "}
-                Teams{" "}
+                Services{" "}
               </Link>
               <Tooltip id="teams-tooltip" />
 
               <Link
-                to="/"
+                to="/reviews"
                 className="mx-4 text-sm  transition-colors duration-300 hover:text-green-500  dark:hover:text-green-400"
                 aria-label="Reddit"
                 data-tooltip-id="privacy-tooltip"
-                data-tooltip-content="Privacy"
+                data-tooltip-content="Reviews"
                 data-tooltip-place="bottom-end"
               >
                 {" "}
-                Privacy{" "}
+                Reviews{" "}
               </Link>
               <Tooltip id="privacy-tooltip" />
 
