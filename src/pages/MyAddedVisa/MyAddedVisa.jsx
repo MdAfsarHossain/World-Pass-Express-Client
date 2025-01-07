@@ -1,16 +1,21 @@
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
 import { Typewriter } from "react-simple-typewriter";
 import Swal from "sweetalert2";
-import MyAddedVisaCard from "../../components/MyAddedVisaCard/MyAddedVisaCard";
+import { formateDate } from "../../components/api/ults";
+import LoadingSpinner from "../../components/LoadingSpinner/LoadingSpinner";
 import useAuth from "../../hooks/useAuth";
+import { axiosSecure } from "../../hooks/useAxiosSecure";
+// import { formateDate } from "../../components/api/ults";
 
 const MyAddedVisa = () => {
   // const myAddedVisas = useLoaderData();
   const { user } = useAuth();
-  const [myAddedVisas, setMyAddedVisas] = useState([]);
+  // const [myAddedVisas, setMyAddedVisas] = useState([]);
   const [selectedVisaType, setSelectedVisaType] = useState("");
   const [selectedApplicationMethod, setSelectedApplicationMethod] =
     useState("");
@@ -45,19 +50,41 @@ const MyAddedVisa = () => {
   useEffect(() => {
     const getMyAddedVisas = async () => {
       setFlag(true);
-      const { data } = await axios.get(
-        `${import.meta.env.VITE_API_URL}/my-added-visas?authorEmail=${
-          user?.email
-        }`
-      );
+      // const { data } = await axios.get(
+      //   `${import.meta.env.VITE_API_URL}/my-added-visas?authorEmail=${
+      //     user?.email
+      //   }`
+      // );
+      // const { data } = await axios.get(
+      //   `${import.meta.env.VITE_API_URL}/my-added-visas/${user?.email}`,
+      //   {
+      //     withCredentials: true,
+      //   }
+      // );
+      const { data } = await axiosSecure(`/my-added-visas/${user?.email}`);
 
-      setMyAddedVisas(data);
+      // setMyAddedVisas(data);
       setFlag(false);
     };
 
-    getMyAddedVisas();
+    // getMyAddedVisas();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [updateFlag]);
+
+  // Load all My added visas data by using tanstack query
+  const {
+    data: myAddedVisas = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["myAddedVisas"],
+    queryFn: async () => {
+      setFlag(true);
+      const { data } = await axiosSecure(`/my-added-visas/${user?.email}`);
+      setFlag(false);
+      return data;
+    },
+  });
 
   // useEffect(() => {
   // setTimeout(() => {
@@ -194,13 +221,16 @@ const MyAddedVisa = () => {
 
       toast.success("Visa data updated successfully!");
       setUpdateFlag(true);
+      refetch();
 
       document.getElementById("my_modal_1").close();
-    } catch (error) {}
+    } catch (error) { }
   };
 
+  if (isLoading) return <LoadingSpinner />
+
   return (
-    <div className="px-10">
+    <div className="px-2">
       {/* Dynamic Title */}
       <Helmet>
         <title>World Pass Express | My Added Visas</title>
@@ -228,14 +258,14 @@ const MyAddedVisa = () => {
         </div>
 
         {/* Loading Spinner */}
-        {flag && (
+        {/* {flag && (
           <div
             id="loadingSpinner"
             className="h-28 py-52 flex flex-col justify-center items-center"
           >
             <span className="-mt-28 flex flex-row justify-center items-center h-56 mx-auto loading loading-spinner loading-lg text-success"></span>
           </div>
-        )}
+        )} */}
 
         {!flag && (
           <>
@@ -250,18 +280,84 @@ const MyAddedVisa = () => {
           </>
         )}
 
-        {!flag && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-5 mt-14">
-            {myAddedVisas?.map((myVisa) => (
-              <MyAddedVisaCard
-                key={myVisa?._id}
-                visa={myVisa}
-                handleUpdate={handleUpdate}
-                handleDelete={handleDelete}
-              ></MyAddedVisaCard>
-            ))}
-          </div>
-        )}
+        {/* {!flag && ( */}
+
+        {myAddedVisas?.length > 0 &&
+          <>
+            <div className="container p-2 mx-auto sm:p-4 mt-8">
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-xs">
+                  <colgroup>
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                    <col className="w-24" />
+                  </colgroup>
+                  <thead className="">
+                    <tr className="text-left bg-gray-200">
+                      <th className="p-3">VISA ID #</th>
+                      <th className="p-3">Image</th>
+                      <th className="p-3">Added Date</th>
+                      <th className="p-3">Visa Type</th>
+                      <th className="p-3">Country Name</th>
+                      <th className="p-3">VISA Fee</th>
+                      <th className="p-3 text-center">Update</th>
+                      <th className="p-3 text-center">Delete</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {myAddedVisas?.map((visa) => (
+                      <tr key={visa?._id}>
+                        <td className="p-3">#{visa?._id}</td>
+                        <td className="p-3">
+                          <img src={visa?.countryImage} alt={visa?.countryImage} className="w-24 h-12 rounded-sm" />
+                        </td>
+                        <td className="p-3">{formateDate(visa?.createdAt)}</td>
+                        <td className="p-3">{visa?.selectedVisaType}</td>
+                        <td className="p-3">{visa?.countryName}</td>
+                        <td className="p-3">${visa.fee}</td>
+                        <td className="p-3 text-center">
+                          <Link
+                            onClick={handleUpdate(visa?._id)}
+                            // to={`/visa-details/${_id}`}
+                            className="bg-green-500 text-white font-bold px-3 py-1 rounded-full border-2 border-green-500 hover:bg-transparent hover:border-green-500 hover:text-green-500 transition-all"
+                          >
+                            Update
+                          </Link>
+
+                        </td>
+                        <td className="p-3 text-center">
+                          <Link
+                            onClick={handleDelete(visa?._id)}
+                            // to={`/visa-details/${_id}`}
+                            className="bg-red-500 text-white font-bold px-3 py-1 rounded-full border-2 border-red-500 hover:bg-transparent hover:border-red-500 hover:text-red-500 transition-all"
+                          >
+                            Delete
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Cards formate */}
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-5 mt-14">
+              {myAddedVisas?.map((myVisa) => (
+                <MyAddedVisaCard
+                  key={myVisa?._id}
+                  visa={myVisa}
+                  handleUpdate={handleUpdate}
+                  handleDelete={handleDelete}
+                ></MyAddedVisaCard>
+              ))}
+            </div> */}
+          </>
+          // )}
+        }
       </div>
 
       {/* Update Modal */}
