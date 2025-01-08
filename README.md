@@ -29,8 +29,76 @@
 - `Global Coverage:`
     - Access visa information for countries worldwide with multilingual support for ease of use.
 
+## Technologies:
+- React
+- MongoDB
+- Node JS
+- Express
+- Firebase
+- React Router
+- DaisyUI
+- Tailwind
+
+## Dependencies:
+- @fortawesome/fontawesome-svg-core: ^6.6.0
+- @fortawesome/react-fontawesome: ^0.2.2
+- aos: ^2.3.4
+- axios: ^1.7.7
+- firebase: ^10.14.0
+- prop-types: ^15.8.1
+- react: ^18.3.1
+- react-dom: ^18.3.1
+- react-fast-marquee: ^1.6.5
+- react-helmet-async: ^2.0.5
+- react-hook-form: ^7.53.0
+- react-icons: ^5.3.0
+- react-router-dom: ^6.26.2
+- react-simple-typewriter: ^5.0.1
+- react-toastify: ^10.0.5
+- sweetalert2: ^11.14.4
+- swiper: ^11.1.14
+
+## Installation
+- Run `npm install` to install project dependencies
+
+## How to Run
+ 1. Clone the repository
+```js
+git clone https://github.com/MdAfsarHossain/World-Pass-Express-Client.git
+cd world-pass-express-client
+```
+ 2. Install dependencies using
+```js
+npm install
+```
+ 3. Setup Environment Variables
+- Create `.env.local` in the root directory.
+- Add `VITE_API_URL` variable and put your server url here.
+- Create a firebase project and add config here
+firebase config will look like
+```js
+VITE_apiKey
+VITE_authDomain
+VITE_projectId
+VITE_storageBucket
+VITE_messagingSenderId
+VITE_appId
+```
+ 4. Run the website to locally
+```js
+npm run dev
+```
+ 5. Open the website in your local browser http://localhost:5173
+
+## Deployment
+- Hosted on Netlify or Vercel for a fast and reliable experience.
+- Firebase Authentication requires authorized domains to ensure secure access.
+## Contributions
+- Contributions are welcome! Fork this repository, make your changes, and submit a pull request.
+
 ### [Live Link](https://world-pass-express.web.app/)
-### [Project Requirements File Link]()
+### [Server Site Code Link](https://github.com/MdAfsarHossain/World-Pass-Express-Server)
+### [Project Requirements File Link](https://github.com/MdAfsarHossain/World-Pass-Express-Client/blob/main/World_Pass_Express.pdf)
 
 ## [Project Preview]()
-<img src="https://i.ibb.co.com/gd0yYSk/localhost-5173.png">
+<img src="https://raw.githubusercontent.com/MdAfsarHossain/World-Pass-Express-Client/refs/heads/main/Website_Preview.png">
